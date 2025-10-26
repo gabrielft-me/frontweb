@@ -351,23 +351,15 @@ export default function ConsolePage() {
 				.select("*")
 				.limit(1);
 
-			// Prepare data based on what columns exist
+			// Prepare data with all required fields
 			const credentials: Record<string, unknown> = {
-				name: modelName,
+				agent_id: agentId,
+				agent_secret: agentSecret,
+				client_id: clientId,
 				model_name: modelName,
 				user_id: user?.id,
 				status: "active",
 			};
-
-			// Add optional fields if they might exist
-			if (!queryError) {
-				// Table exists, add all fields
-				Object.assign(credentials, {
-					agent_id: agentId,
-					agent_secret: agentSecret,
-					client_id: clientId,
-				});
-			}
 
 			// Store in Supabase (agents table)
 			const { error: insertError } = await supabase
