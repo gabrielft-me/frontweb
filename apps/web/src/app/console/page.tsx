@@ -42,6 +42,18 @@ export default function ConsolePage() {
 		model_name: string;
 	} | null>(null);
 	const [copiedField, setCopiedField] = useState<string | null>(null);
+	const [agents, setAgents] = useState<
+		Array<{
+			id: string;
+			agent_id: string;
+			agent_secret: string;
+			client_id: string;
+			model_name: string;
+			status: string;
+			created_at: string;
+		}>
+	>([]);
+	const [loadingAgents, setLoadingAgents] = useState(false);
 
 	useEffect(() => {
 		if (!loading && !user) {
@@ -52,6 +64,7 @@ export default function ConsolePage() {
 	useEffect(() => {
 		if (user) {
 			loadTables();
+			loadAgents();
 		}
 	}, [user]);
 
@@ -65,6 +78,29 @@ export default function ConsolePage() {
 		window.addEventListener("keydown", handleEscape);
 		return () => window.removeEventListener("keydown", handleEscape);
 	}, [isEditModalOpen]);
+
+	const loadAgents = async () => {
+		setLoadingAgents(true);
+		const supabase = createClient();
+
+		try {
+			const { data, error } = await supabase
+				.from("agents")
+				.select("*")
+				.eq("user_id", user?.id)
+				.order("created_at", { ascending: false });
+
+			if (error) {
+				console.error("Error loading agents:", error);
+			} else {
+				setAgents(data || []);
+			}
+		} catch (err) {
+			console.error("Error loading agents:", err);
+		} finally {
+			setLoadingAgents(false);
+		}
+	};
 
 	const loadTables = async () => {
 		setLoadingTables(true);
@@ -309,15 +345,29 @@ export default function ConsolePage() {
 			const agentSecret = generateRandomString(32);
 			const clientId = `client_${generateRandomString(16)}`;
 
-			const credentials = {
-				agent_id: agentId,
-				agent_secret: agentSecret,
-				client_id: clientId,
+			// First, let's try to query the table structure
+			const { data: existingAgents, error: queryError } = await supabase
+				.from("agents")
+				.select("*")
+				.limit(1);
+
+			// Prepare data based on what columns exist
+			const credentials: Record<string, unknown> = {
+				name: modelName,
 				model_name: modelName,
 				user_id: user?.id,
-				created_at: new Date().toISOString(),
 				status: "active",
 			};
+
+			// Add optional fields if they might exist
+			if (!queryError) {
+				// Table exists, add all fields
+				Object.assign(credentials, {
+					agent_id: agentId,
+					agent_secret: agentSecret,
+					client_id: clientId,
+				});
+			}
 
 			// Store in Supabase (agents table)
 			const { error: insertError } = await supabase
@@ -326,6 +376,7 @@ export default function ConsolePage() {
 
 			if (insertError) {
 				setError(`Error creating agent: ${insertError.message}`);
+				console.error("Insert error details:", insertError);
 			} else {
 				setNewAgentCredentials({
 					agent_id: agentId,
@@ -335,6 +386,8 @@ export default function ConsolePage() {
 				});
 				setShowAgentModal(true);
 				setError(null);
+				// Reload agents list
+				await loadAgents();
 			}
 		} catch (err) {
 			console.error("Error:", err);
@@ -348,6 +401,16 @@ export default function ConsolePage() {
 		navigator.clipboard.writeText(text);
 		setCopiedField(field);
 		setTimeout(() => setCopiedField(null), 2000);
+	};
+
+	const handleAgentCardClick = (agent: {
+		agent_id: string;
+		agent_secret: string;
+		client_id: string;
+		model_name: string;
+	}) => {
+		setNewAgentCredentials(agent);
+		setShowAgentModal(true);
 	};
 
 	if (loading) {
@@ -411,118 +474,76 @@ export default function ConsolePage() {
 					<h2 className="mb-6 text-center font-semibold text-xl text-zinc-300 uppercase tracking-wider sm:text-2xl">
 						Select an Agent to Begin Monitoring
 					</h2>
-					<div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-						{/* Agent 1 */}
-						<div className="group cursor-pointer rounded-xl border border-zinc-800 bg-zinc-900 p-6 transition-all hover:border-primary hover:bg-zinc-900/80 sm:p-8">
-							<div className="flex flex-col items-center gap-4">
-								<div className="flex w-full items-center justify-between">
-									<div className="rounded-2xl bg-zinc-800 p-4">
-										<svg
-											className="h-8 w-8 text-primary"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-											role="img"
-											aria-label="Agent icon"
-										>
-											<path
-												strokeLinecap="round"
-												strokeLinejoin="round"
-												strokeWidth={2}
-												d="M13 10V3L4 14h7v7l9-11h-7z"
-											/>
-										</svg>
-									</div>
-									<div className="flex items-center gap-2">
-										<div className="h-2 w-2 rounded-full bg-green-500" />
-										<span className="text-green-400 text-xs uppercase tracking-wider">
-											Online
-										</span>
-									</div>
-								</div>
-								<div className="w-full text-center">
-									<h3 className="font-bold text-2xl text-white">Agent 1</h3>
-									<p className="mt-1 text-sm text-zinc-400">
-										Unit ID: agent-001
-									</p>
-								</div>
-							</div>
+					{loadingAgents ? (
+						<div className="py-8 text-center text-zinc-400">
+							Loading agents...
 						</div>
-
-						{/* Agent 2 */}
-						<div className="group cursor-pointer rounded-xl border border-zinc-800 bg-zinc-900 p-6 transition-all hover:border-primary hover:bg-zinc-900/80 sm:p-8">
-							<div className="flex flex-col items-center gap-4">
-								<div className="flex w-full items-center justify-between">
-									<div className="rounded-2xl bg-zinc-800 p-4">
-										<svg
-											className="h-8 w-8 text-primary"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-											role="img"
-											aria-label="Agent icon"
-										>
-											<path
-												strokeLinecap="round"
-												strokeLinejoin="round"
-												strokeWidth={2}
-												d="M13 10V3L4 14h7v7l9-11h-7z"
-											/>
-										</svg>
-									</div>
-									<div className="flex items-center gap-2">
-										<div className="h-2 w-2 rounded-full bg-green-500" />
-										<span className="text-green-400 text-xs uppercase tracking-wider">
-											Online
-										</span>
-									</div>
-								</div>
-								<div className="w-full text-center">
-									<h3 className="font-bold text-2xl text-white">Agent 2</h3>
-									<p className="mt-1 text-sm text-zinc-400">
-										Unit ID: agent-002
-									</p>
-								</div>
-							</div>
+					) : agents.length === 0 ? (
+						<div className="py-8 text-center">
+							<p className="text-zinc-400">
+								No agents created yet. Click "Create Agent" to get started.
+							</p>
 						</div>
-
-						{/* Agent 3 */}
-						<div className="group cursor-pointer rounded-xl border border-zinc-800 bg-zinc-900 p-6 transition-all hover:border-primary hover:bg-zinc-900/80 sm:p-8">
-							<div className="flex flex-col items-center gap-4">
-								<div className="flex w-full items-center justify-between">
-									<div className="rounded-2xl bg-zinc-800 p-4">
-										<svg
-											className="h-8 w-8 text-primary"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-											role="img"
-											aria-label="Agent icon"
-										>
-											<path
-												strokeLinecap="round"
-												strokeLinejoin="round"
-												strokeWidth={2}
-												d="M13 10V3L4 14h7v7l9-11h-7z"
-											/>
-										</svg>
+					) : (
+						<div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+							{agents.map((agent, index) => (
+								<button
+									key={agent.id}
+									type="button"
+									onClick={() => handleAgentCardClick(agent)}
+									className="group cursor-pointer rounded-xl border border-zinc-800 bg-zinc-900 p-6 text-left transition-all hover:border-primary hover:bg-zinc-900/80 sm:p-8"
+								>
+									<div className="flex flex-col items-center gap-4">
+										<div className="flex w-full items-center justify-between">
+											<div className="rounded-2xl bg-zinc-800 p-4">
+												<svg
+													className="h-8 w-8 text-primary"
+													fill="none"
+													stroke="currentColor"
+													viewBox="0 0 24 24"
+													role="img"
+													aria-label="Agent icon"
+												>
+													<path
+														strokeLinecap="round"
+														strokeLinejoin="round"
+														strokeWidth={2}
+														d="M13 10V3L4 14h7v7l9-11h-7z"
+													/>
+												</svg>
+											</div>
+											<div className="flex items-center gap-2">
+												<div
+													className={`h-2 w-2 rounded-full ${
+														agent.status === "active"
+															? "bg-green-500"
+															: "bg-yellow-500"
+													}`}
+												/>
+												<span
+													className={`text-xs uppercase tracking-wider ${
+														agent.status === "active"
+															? "text-green-400"
+															: "text-yellow-400"
+													}`}
+												>
+													{agent.status === "active" ? "Online" : "Idle"}
+												</span>
+											</div>
+										</div>
+										<div className="w-full text-center">
+											<h3 className="font-bold text-2xl text-white">
+												{agent.model_name}
+											</h3>
+											<p className="mt-1 text-sm text-zinc-400">
+												Unit ID: {agent.agent_id}
+											</p>
+										</div>
 									</div>
-									<div className="flex items-center gap-2">
-										<div className="h-2 w-2 rounded-full bg-yellow-500" />
-										<span className="text-xs text-yellow-400 uppercase tracking-wider">
-											Idle
-										</span>
-									</div>
-								</div>
-								<div className="w-full text-center">
-									<h3 className="font-bold text-2xl text-white">Agent 3</h3>
-									<p className="mt-1 text-sm text-zinc-400">
-										Unit ID: agent-003
-									</p>
-								</div>
-							</div>
+								</button>
+							))}
 						</div>
-					</div>
+					)}
 				</div>
 
 				{/* Error Display */}

@@ -1,3 +1,72 @@
+# Supabase Configuration
+
+## Table of Contents
+1. [Database Setup - Agents Table](#database-setup-agents-table)
+2. [OAuth Configuration](#oauth-configuration)
+3. [Production URL Setup](#production-url-setup)
+
+## Database Setup - Agents Table
+
+Before using the agent creation feature, you need to create the `agents` table in Supabase.
+
+### Steps:
+
+1. **Go to Supabase SQL Editor:**
+   - Visit https://app.supabase.com
+   - Select your project: `fujtsqnsjyqxxinbzsbw`
+   - Navigate to **SQL Editor** in the left sidebar
+
+2. **Run the SQL Migration:**
+
+   **Use CREATE_AGENTS_TABLE_MINIMAL.sql (RECOMMENDED):**
+
+   This is the simplest, most reliable option:
+
+   ```
+   1. Open the file: CREATE_AGENTS_TABLE_MINIMAL.sql
+   2. Select ALL the text (Ctrl/Cmd + A)
+   3. Copy it (Ctrl/Cmd + C)
+   4. Go to Supabase SQL Editor
+   5. Paste (Ctrl/Cmd + V)
+   6. Click the green "Run" button
+   7. Wait for success message
+   ```
+
+   **What it does:**
+   - Drops any existing agents table
+   - Creates fresh table with all columns
+   - Adds performance indexes
+   - Sets proper permissions
+   - Verifies columns were created correctly
+
+   **Alternative Options:**
+   - `CREATE_AGENTS_TABLE_SIMPLE.sql` - Basic table without RLS
+   - `CREATE_AGENTS_TABLE.sql` - Full production setup with Row Level Security
+
+3. **Verify Table Creation:**
+   - Go to **Table Editor**
+   - You should see the `agents` table with these columns:
+     - `id` (UUID, Primary Key)
+     - `agent_id` (Text, Unique)
+     - `agent_secret` (Text)
+     - `client_id` (Text, Unique)
+     - `model_name` (Text)
+     - `user_id` (UUID, Foreign Key to auth.users)
+     - `status` (Text, default: 'active')
+     - `created_at` (Timestamp)
+     - `updated_at` (Timestamp)
+
+### What the Migration Does:
+
+- ✅ Creates `agents` table with proper schema
+- ✅ Adds indexes for faster queries
+- ✅ Enables Row Level Security (RLS)
+- ✅ Creates policies so users can only access their own agents
+- ✅ Sets up automatic `updated_at` timestamp
+- ✅ Grants proper permissions
+
+---
+
 # Supabase Configuration for Production
 
 ## Critical: Fix OAuth Redirect to Production URL
