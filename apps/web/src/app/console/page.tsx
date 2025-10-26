@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Trash2, X } from "lucide-react";
+import { Check, Copy, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,17 @@ export default function ConsolePage() {
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [editFormData, setEditFormData] = useState<Record<string, unknown>>({});
 	const [isUpdating, setIsUpdating] = useState(false);
+	const [isCreatingAgent, setIsCreatingAgent] = useState(false);
+	const [showAgentModal, setShowAgentModal] = useState(false);
+	const [showCreateAgentForm, setShowCreateAgentForm] = useState(false);
+	const [newModelName, setNewModelName] = useState("");
+	const [newAgentCredentials, setNewAgentCredentials] = useState<{
+		agent_id: string;
+		agent_secret: string;
+		client_id: string;
+		model_name: string;
+	} | null>(null);
+	const [copiedField, setCopiedField] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (!loading && !user) {
@@ -278,6 +289,67 @@ export default function ConsolePage() {
 		}
 	};
 
+	const generateRandomString = (length: number) => {
+		const chars =
+			"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		let result = "";
+		for (let i = 0; i < length; i++) {
+			result += chars.charAt(Math.floor(Math.random() * chars.length));
+		}
+		return result;
+	};
+
+	const handleCreateAgent = async (modelName: string) => {
+		setIsCreatingAgent(true);
+		const supabase = createClient();
+
+		try {
+			// Generate credentials
+			const agentId = `agent_${generateRandomString(16)}`;
+			const agentSecret = generateRandomString(32);
+			const clientId = `client_${generateRandomString(16)}`;
+
+			const credentials = {
+				agent_id: agentId,
+				agent_secret: agentSecret,
+				client_id: clientId,
+				model_name: modelName,
+				user_id: user?.id,
+				created_at: new Date().toISOString(),
+				status: "active",
+			};
+
+			// Store in Supabase (agents table)
+			const { error: insertError } = await supabase
+				.from("agents")
+				.insert([credentials]);
+
+			if (insertError) {
+				setError(`Error creating agent: ${insertError.message}`);
+			} else {
+				setNewAgentCredentials({
+					agent_id: agentId,
+					agent_secret: agentSecret,
+					client_id: clientId,
+					model_name: modelName,
+				});
+				setShowAgentModal(true);
+				setError(null);
+			}
+		} catch (err) {
+			console.error("Error:", err);
+			setError("Error creating agent");
+		} finally {
+			setIsCreatingAgent(false);
+		}
+	};
+
+	const copyToClipboard = (text: string, field: string) => {
+		navigator.clipboard.writeText(text);
+		setCopiedField(field);
+		setTimeout(() => setCopiedField(null), 2000);
+	};
+
 	if (loading) {
 		return (
 			<div className="flex min-h-screen items-center justify-center">
@@ -316,13 +388,22 @@ export default function ConsolePage() {
 							Signed in as {user.email}
 						</p>
 					</div>
-					<Button
-						onClick={signOut}
-						variant="outline"
-						className="w-full sm:w-auto"
-					>
-						Sign Out
-					</Button>
+					<div className="flex gap-2">
+						<Button
+							onClick={() => setShowCreateAgentForm(true)}
+							className="gap-2 bg-primary hover:bg-primary/90"
+						>
+							<Plus className="h-4 w-4" />
+							Create Agent
+						</Button>
+						<Button
+							onClick={signOut}
+							variant="outline"
+							className="w-full sm:w-auto"
+						>
+							Sign Out
+						</Button>
+					</div>
 				</div>
 
 				{/* Agents Section */}
@@ -777,6 +858,249 @@ export default function ConsolePage() {
 							</div>
 						</div>
 					</button>
+				)}
+
+				{/* Create Agent Form Modal */}
+				{showCreateAgentForm && (
+					<>
+						{/* biome-ignore lint/a11y/useKeyWithClickEvents: Modal backdrop requires click to close */}
+						{/* biome-ignore lint/a11y/noStaticElementInteractions: Modal backdrop requires click to close */}
+						<div
+							className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+							onClick={() => setShowCreateAgentForm(false)}
+						>
+							<div
+								className="w-full max-w-md rounded-lg border border-zinc-800 bg-zinc-900 p-6 shadow-2xl"
+								onClick={(e) => e.stopPropagation()}
+								onKeyDown={(e) => {
+									e.stopPropagation();
+									if (e.key === "Escape") setShowCreateAgentForm(false);
+								}}
+								role="dialog"
+								tabIndex={-1}
+							>
+								<h3 className="mb-4 font-bold text-white text-xl">
+									Create New Agent
+								</h3>
+								<div className="space-y-4">
+									<div>
+										<label
+											htmlFor="model-name"
+											className="mb-2 block text-sm text-zinc-300"
+										>
+											Model Name
+										</label>
+										<input
+											id="model-name"
+											type="text"
+											value={newModelName}
+											onChange={(e) => setNewModelName(e.target.value)}
+											placeholder="e.g., GPT-4, Claude, Gemini"
+											className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-primary focus:outline-none"
+										/>
+									</div>
+									<div className="flex justify-end gap-3">
+										<Button
+											onClick={() => {
+												setShowCreateAgentForm(false);
+												setNewModelName("");
+											}}
+											variant="outline"
+										>
+											Cancel
+										</Button>
+										<Button
+											onClick={() => {
+												if (newModelName.trim()) {
+													handleCreateAgent(newModelName);
+													setShowCreateAgentForm(false);
+													setNewModelName("");
+												}
+											}}
+											disabled={!newModelName.trim() || isCreatingAgent}
+											className="bg-primary hover:bg-primary/90"
+										>
+											{isCreatingAgent ? "Creating..." : "Create Agent"}
+										</Button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</>
+				)}
+
+				{/* Agent Credentials Modal */}
+				{showAgentModal && newAgentCredentials && (
+					<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+						<div className="w-full max-w-2xl rounded-lg border border-zinc-800 bg-zinc-900 shadow-2xl">
+							<div className="border-zinc-800 border-b p-6">
+								<h3 className="font-bold text-white text-xl">
+									Agent Created Successfully!
+								</h3>
+								<p className="mt-1 text-sm text-zinc-400">
+									Save these credentials securely. You won't be able to see the
+									agent_secret again.
+								</p>
+							</div>
+
+							<div className="space-y-4 p-6">
+								{/* Agent ID */}
+								<div>
+									<label
+										htmlFor="agent-id"
+										className="mb-2 block font-medium text-sm text-zinc-300"
+									>
+										Agent ID
+									</label>
+									<div className="flex gap-2">
+										<input
+											id="agent-id"
+											type="text"
+											value={newAgentCredentials.agent_id}
+											readOnly
+											className="flex-1 rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+										/>
+										<Button
+											onClick={() =>
+												copyToClipboard(
+													newAgentCredentials.agent_id,
+													"agent_id",
+												)
+											}
+											variant="outline"
+											size="sm"
+											className="gap-2"
+										>
+											{copiedField === "agent_id" ? (
+												<>
+													<Check className="h-4 w-4" />
+													Copied
+												</>
+											) : (
+												<>
+													<Copy className="h-4 w-4" />
+													Copy
+												</>
+											)}
+										</Button>
+									</div>
+								</div>
+
+								{/* Agent Secret */}
+								<div>
+									<label
+										htmlFor="agent-secret"
+										className="mb-2 block font-medium text-sm text-zinc-300"
+									>
+										Agent Secret
+									</label>
+									<div className="flex gap-2">
+										<input
+											id="agent-secret"
+											type="text"
+											value={newAgentCredentials.agent_secret}
+											readOnly
+											className="flex-1 rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 font-mono text-sm text-white"
+										/>
+										<Button
+											onClick={() =>
+												copyToClipboard(
+													newAgentCredentials.agent_secret,
+													"agent_secret",
+												)
+											}
+											variant="outline"
+											size="sm"
+											className="gap-2"
+										>
+											{copiedField === "agent_secret" ? (
+												<>
+													<Check className="h-4 w-4" />
+													Copied
+												</>
+											) : (
+												<>
+													<Copy className="h-4 w-4" />
+													Copy
+												</>
+											)}
+										</Button>
+									</div>
+								</div>
+
+								{/* Client ID */}
+								<div>
+									<label
+										htmlFor="client-id"
+										className="mb-2 block font-medium text-sm text-zinc-300"
+									>
+										Client ID (OAuth)
+									</label>
+									<div className="flex gap-2">
+										<input
+											id="client-id"
+											type="text"
+											value={newAgentCredentials.client_id}
+											readOnly
+											className="flex-1 rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+										/>
+										<Button
+											onClick={() =>
+												copyToClipboard(
+													newAgentCredentials.client_id,
+													"client_id",
+												)
+											}
+											variant="outline"
+											size="sm"
+											className="gap-2"
+										>
+											{copiedField === "client_id" ? (
+												<>
+													<Check className="h-4 w-4" />
+													Copied
+												</>
+											) : (
+												<>
+													<Copy className="h-4 w-4" />
+													Copy
+												</>
+											)}
+										</Button>
+									</div>
+								</div>
+
+								{/* Model Name */}
+								<div>
+									<label
+										htmlFor="model-name-display"
+										className="mb-2 block font-medium text-sm text-zinc-300"
+									>
+										Model Name
+									</label>
+									<input
+										id="model-name-display"
+										type="text"
+										value={newAgentCredentials.model_name}
+										readOnly
+										className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+									/>
+								</div>
+							</div>
+
+							<div className="border-zinc-800 border-t p-6">
+								<Button
+									onClick={() => {
+										setShowAgentModal(false);
+										setNewAgentCredentials(null);
+									}}
+									className="w-full bg-primary hover:bg-primary/90"
+								>
+									Done
+								</Button>
+							</div>
+						</div>
+					</div>
 				)}
 			</div>
 		</div>
