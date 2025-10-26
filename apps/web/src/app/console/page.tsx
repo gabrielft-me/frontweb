@@ -516,7 +516,9 @@ export default function ConsolePage() {
 															{Object.values(row).map(
 																(value: unknown, cellIdx) => (
 																	<td
-																		key={`cell-${idx}-${rowKeys[cellIdx] || cellIdx}`}
+																		key={`cell-${idx}-${
+																			rowKeys[cellIdx] || cellIdx
+																		}`}
 																		className="border-zinc-800 border-b px-3 py-2 text-sm text-zinc-300 sm:px-4 sm:py-3"
 																	>
 																		<div

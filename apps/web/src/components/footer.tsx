@@ -119,8 +119,8 @@ export default function Footer() {
 								{section.title}
 							</h3>
 							<ul className="space-y-2">
-								{section.links.map((link) => (
-									<li key={link.href}>
+								{section.links.map((link, index) => (
+									<li key={`${section.title}-${link.label}-${index}`}>
 										{link.external ? (
 											<a
 												href={link.href}
