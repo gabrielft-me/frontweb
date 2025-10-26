@@ -1,0 +1,136 @@
+/* Custom syntax highlighting theme using project colors */
+.hljs {
+	color: #e4e4e7; /* zinc-200 - texto padrão */
+	background: transparent;
+}
+
+/* Comments */
+.hljs-comment,
+.hljs-quote {
+	color: #71717a; /* zinc-500 - comentários em cinza */
+	font-style: italic;
+}
+
+/* Keywords (from, import, def, class, async, await, etc) */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+	color: oklch(0.706 0.195 44.5); /* primary laranja - palavras-chave */
+	font-weight: 600;
+}
+
+/* Strings, literals */
+.hljs-string,
+.hljs-doctag {
+	color: oklch(0.75 0.15 150); /* verde suave - strings */
+}
+
+/* Literal values (True, False, None, null, undefined) */
+.hljs-literal {
+	color: oklch(0.75 0.15 250); /* azul suave - valores literais */
+	font-weight: 500;
+}
+
+/* Numbers */
+.hljs-number {
+	color: oklch(0.78 0.17 75); /* amarelo/dourado - números */
+}
+
+/* Function names, method names, built-ins */
+.hljs-title,
+.hljs-function .hljs-title,
+.hljs-section {
+	color: oklch(0.8 0.13 200); /* ciano/azul claro - funções */
+	font-weight: 600;
+}
+
+/* Built-in functions (print, len, etc) */
+.hljs-built_in {
+	color: oklch(0.75 0.15 250); /* azul - built-ins */
+	font-weight: 500;
+}
+
+/* Variables, attributes */
+.hljs-variable,
+.hljs-attr {
+	color: #d4d4d8; /* zinc-300 - variáveis */
+}
+
+/* Parameters */
+.hljs-params {
+	color: oklch(0.72 0.08 30); /* coral suave - parâmetros */
+}
+
+/* Class names, types */
+.hljs-class .hljs-title,
+.hljs-type,
+.hljs-name {
+	color: oklch(0.75 0.18 310); /* roxo/magenta - classes */
+	font-weight: 600;
+}
+
+/* Decorators, annotations */
+.hljs-meta,
+.hljs-meta .hljs-keyword {
+	color: oklch(0.7 0.12 280); /* roxo escuro - decorators */
+}
+
+.hljs-meta .hljs-string {
+	color: oklch(0.75 0.15 150); /* verde - strings em meta */
+}
+
+/* Regex, symbols */
+.hljs-regexp,
+.hljs-symbol,
+.hljs-bullet {
+	color: oklch(0.73 0.13 340); /* rosa - regex/symbols */
+}
+
+/* Operators and punctuation */
+.hljs-operator,
+.hljs-punctuation {
+	color: #a1a1aa; /* zinc-400 - operadores */
+}
+
+/* Tags (HTML/XML) */
+.hljs-tag {
+	color: #d4d4d8;
+}
+
+.hljs-tag .hljs-name {
+	color: oklch(0.706 0.195 44.5); /* primary - tag names */
+	font-weight: 600;
+}
+
+.hljs-tag .hljs-attr {
+	color: oklch(0.75 0.15 250); /* azul - atributos */
+}
+
+/* Module/package imports */
+.hljs-title.class_,
+.hljs-title.class_.inherited__ {
+	color: oklch(0.75 0.18 310); /* roxo - classes importadas */
+}
+
+/* Deletion */
+.hljs-deletion {
+	color: oklch(0.65 0.25 25); /* vermelho harmonioso */
+	background: oklch(0.3 0.1 25 / 0.2);
+}
+
+/* Addition */
+.hljs-addition {
+	color: oklch(0.7 0.18 140); /* verde harmonioso */
+	background: oklch(0.35 0.1 140 / 0.2);
+}
+
+/* Emphasis */
+.hljs-emphasis {
+	font-style: italic;
+}
+
+/* Strong */
+.hljs-strong {
+	font-weight: 700;
+	color: #fafafa; /* branco para destaque */
+}
