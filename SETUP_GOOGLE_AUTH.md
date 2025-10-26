@@ -79,13 +79,41 @@ This application now has Google Authentication integrated with Supabase. Follow 
 - `src/components/providers.tsx` - Added AuthProvider
 - `src/components/sections/hero-section.tsx` - Added Google sign-in button
 
+## Environment Variables
+
+Make sure to set the following environment variables:
+
+### Local Development (.env.local)
+```
+NEXT_PUBLIC_SITE_URL=http://localhost:3001
+NEXT_PUBLIC_SUPABASE_URL=https://fujtsqnsjyqxxinbzsbw.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+```
+
+### Production (Vercel)
+Add these environment variables in your Vercel project settings:
+```
+NEXT_PUBLIC_SITE_URL=https://frontweb-web.vercel.app
+NEXT_PUBLIC_SUPABASE_URL=https://fujtsqnsjyqxxinbzsbw.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+```
+
+**Important:** The `NEXT_PUBLIC_SITE_URL` variable ensures OAuth redirects work correctly in both development and production.
+
 ## Running the Application
 
+### Local Development
 ```bash
 bun dev
 ```
 
 Visit: http://localhost:3001
+
+### Production
+Deploy to Vercel and make sure to:
+1. Set all environment variables in Vercel dashboard
+2. Add production redirect URL in Supabase: `https://frontweb-web.vercel.app/auth/callback`
+3. Add production URL in Google OAuth settings
 
 ## Testing the Flow
 
