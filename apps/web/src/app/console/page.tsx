@@ -310,7 +310,7 @@ export default function ConsolePage() {
 				<div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
 					<div>
 						<h1 className="font-bold text-2xl text-white sm:text-3xl">
-							Database Console
+							Agent Console
 						</h1>
 						<p className="text-sm text-zinc-400 sm:text-base">
 							Signed in as {user.email}
@@ -323,6 +323,125 @@ export default function ConsolePage() {
 					>
 						Sign Out
 					</Button>
+				</div>
+
+				{/* Agents Section */}
+				<div className="mb-8">
+					<h2 className="mb-6 text-center font-semibold text-xl text-zinc-300 uppercase tracking-wider sm:text-2xl">
+						Select an Agent to Begin Monitoring
+					</h2>
+					<div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+						{/* Agent 1 */}
+						<div className="group cursor-pointer rounded-xl border border-zinc-800 bg-zinc-900 p-6 transition-all hover:border-primary hover:bg-zinc-900/80 sm:p-8">
+							<div className="flex flex-col items-center gap-4">
+								<div className="flex w-full items-center justify-between">
+									<div className="rounded-2xl bg-zinc-800 p-4">
+										<svg
+											className="h-8 w-8 text-primary"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+											role="img"
+											aria-label="Agent icon"
+										>
+											<path
+												strokeLinecap="round"
+												strokeLinejoin="round"
+												strokeWidth={2}
+												d="M13 10V3L4 14h7v7l9-11h-7z"
+											/>
+										</svg>
+									</div>
+									<div className="flex items-center gap-2">
+										<div className="h-2 w-2 rounded-full bg-green-500" />
+										<span className="text-green-400 text-xs uppercase tracking-wider">
+											Online
+										</span>
+									</div>
+								</div>
+								<div className="w-full text-center">
+									<h3 className="font-bold text-2xl text-white">Agent 1</h3>
+									<p className="mt-1 text-sm text-zinc-400">
+										Unit ID: agent-001
+									</p>
+								</div>
+							</div>
+						</div>
+
+						{/* Agent 2 */}
+						<div className="group cursor-pointer rounded-xl border border-zinc-800 bg-zinc-900 p-6 transition-all hover:border-primary hover:bg-zinc-900/80 sm:p-8">
+							<div className="flex flex-col items-center gap-4">
+								<div className="flex w-full items-center justify-between">
+									<div className="rounded-2xl bg-zinc-800 p-4">
+										<svg
+											className="h-8 w-8 text-primary"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+											role="img"
+											aria-label="Agent icon"
+										>
+											<path
+												strokeLinecap="round"
+												strokeLinejoin="round"
+												strokeWidth={2}
+												d="M13 10V3L4 14h7v7l9-11h-7z"
+											/>
+										</svg>
+									</div>
+									<div className="flex items-center gap-2">
+										<div className="h-2 w-2 rounded-full bg-green-500" />
+										<span className="text-green-400 text-xs uppercase tracking-wider">
+											Online
+										</span>
+									</div>
+								</div>
+								<div className="w-full text-center">
+									<h3 className="font-bold text-2xl text-white">Agent 2</h3>
+									<p className="mt-1 text-sm text-zinc-400">
+										Unit ID: agent-002
+									</p>
+								</div>
+							</div>
+						</div>
+
+						{/* Agent 3 */}
+						<div className="group cursor-pointer rounded-xl border border-zinc-800 bg-zinc-900 p-6 transition-all hover:border-primary hover:bg-zinc-900/80 sm:p-8">
+							<div className="flex flex-col items-center gap-4">
+								<div className="flex w-full items-center justify-between">
+									<div className="rounded-2xl bg-zinc-800 p-4">
+										<svg
+											className="h-8 w-8 text-primary"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+											role="img"
+											aria-label="Agent icon"
+										>
+											<path
+												strokeLinecap="round"
+												strokeLinejoin="round"
+												strokeWidth={2}
+												d="M13 10V3L4 14h7v7l9-11h-7z"
+											/>
+										</svg>
+									</div>
+									<div className="flex items-center gap-2">
+										<div className="h-2 w-2 rounded-full bg-yellow-500" />
+										<span className="text-xs text-yellow-400 uppercase tracking-wider">
+											Idle
+										</span>
+									</div>
+								</div>
+								<div className="w-full text-center">
+									<h3 className="font-bold text-2xl text-white">Agent 3</h3>
+									<p className="mt-1 text-sm text-zinc-400">
+										Unit ID: agent-003
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 
 				{/* Error Display */}
