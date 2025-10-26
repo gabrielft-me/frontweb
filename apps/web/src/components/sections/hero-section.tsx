@@ -1,9 +1,15 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import Container from "@/components/container";
 import { Button } from "@/components/ui/button";
 import { LightRays } from "@/components/ui/light-rays";
 import { TypingAnimation } from "@/components/ui/typing-animation";
+import { useAuth } from "@/contexts/auth-context";
 
 export function HeroSection() {
+	const { user, signInWithGoogle } = useAuth();
+	const router = useRouter();
 	return (
 		<section className="relative flex min-h-screen w-full flex-col items-center justify-center gap-6">
 			<Container className="z-20 py-24 sm:py-32 md:py-48">
@@ -44,14 +50,27 @@ export function HeroSection() {
 								variant="default"
 								size="lg"
 								className="w-full bg-primary py-6 font-semibold text-xl uppercase tracking-tight hover:text-white sm:w-auto sm:py-8 sm:text-lg md:text-xl lg:text-2xl"
+								onClick={() => {
+									if (user) {
+										router.push("/console");
+									} else {
+										signInWithGoogle();
+									}
+								}}
 							>
-								Get started for free
+								{user ? "Go to Console" : "Sign in with Google"}
 							</Button>
 
 							<Button
 								variant="default"
 								size="lg"
 								className="w-full py-6 font-semibold text-xl uppercase tracking-tight hover:border-primary hover:bg-transparent hover:text-primary sm:w-auto sm:py-8 sm:text-lg md:text-xl lg:text-2xl"
+								onClick={() =>
+									window.open(
+										"https://aiauth.mintlify.app/introduction",
+										"_blank",
+									)
+								}
 							>
 								View Documentation
 							</Button>

@@ -1,5 +1,9 @@
+"use client";
+
 import type { Route } from "next";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
 
 type FooterLink = {
 	label: string;
@@ -33,23 +37,23 @@ const footerSections: FooterSection[] = [
 		title: "Documentation",
 		links: [
 			{
+				label: "Introduction",
+				href: "https://aiauth.mintlify.app/introduction",
+				external: true,
+			},
+			{
 				label: "Quickstart",
-				href: "https://github.com/hetpatel-11/Auth-Agent2/blob/main/docs/quickstart.mdx",
+				href: "https://aiauth.mintlify.app/introduction",
 				external: true,
 			},
 			{
 				label: "Integration Guide",
-				href: "https://github.com/hetpatel-11/Auth-Agent2/blob/main/docs/INTEGRATION_GUIDE.md",
+				href: "https://aiauth.mintlify.app/introduction",
 				external: true,
 			},
 			{
 				label: "API Reference",
-				href: "https://github.com/hetpatel-11/Auth-Agent2/blob/main/docs/api/endpoints.mdx",
-				external: true,
-			},
-			{
-				label: "Security Guide",
-				href: "https://github.com/hetpatel-11/Auth-Agent2/blob/main/docs/api/authentication.mdx",
+				href: "https://aiauth.mintlify.app/introduction",
 				external: true,
 			},
 		],
@@ -58,13 +62,13 @@ const footerSections: FooterSection[] = [
 		title: "Resources",
 		links: [
 			{
-				label: "Python SDK",
-				href: "https://github.com/hetpatel-11/Auth-Agent2/blob/main/docs/sdk/python.mdx",
+				label: "Documentation",
+				href: "https://aiauth.mintlify.app/introduction",
 				external: true,
 			},
 			{
 				label: "Code Examples",
-				href: "https://github.com/hetpatel-11/Auth-Agent2/blob/main/docs/sdk/examples.mdx",
+				href: "https://aiauth.mintlify.app/introduction",
 				external: true,
 			},
 			{
@@ -97,6 +101,14 @@ const footerSections: FooterSection[] = [
 ];
 
 export default function Footer() {
+	const pathname = usePathname();
+	const { user } = useAuth();
+
+	// Hide footer on console page when user is logged in
+	if (pathname === "/console" && user) {
+		return null;
+	}
+
 	return (
 		<footer className="border-zinc-800 border-t px-4 py-12">
 			<div className="mx-auto w-full max-w-[80rem]">
